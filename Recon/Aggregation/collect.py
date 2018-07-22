@@ -22,7 +22,6 @@ import sys
 def match_data_get(id, region):
     conn = db.Connection()
     matchInfo = conn.match_info_get(id, region)
-    #conn.__del__()
     del conn
     if len(matchInfo) == 0:
         print("Match data for " + str(id) + " does not exist.  "
@@ -43,11 +42,9 @@ def match_data_get(id, region):
                     conn.match_add(id, tier,
                                    patchMajor, patchMinor, region, None)
                     del conn
-                    #conn.__del__()
                     return -2, -2, -2, -2
             conn = db.Connection()
             key = conn.match_add(id, tier, patchMajor, patchMinor, region, data)
-            #conn.__del__()
             del conn
             return response, tier, key, players
         except AttributeError as e:
@@ -62,10 +59,8 @@ def match_data_get(id, region):
         conn = db.Connection()
         if not conn.match_stats_full(key):
             data = conn.match_data_get(key)
-            #conn.__del__()
             return data, tier, key
         else:
-            #conn.__del__()
             print("Fully added data, no need for pull matchData.")
             data = tier = key = -1
         del conn
@@ -109,7 +104,7 @@ def matches_collect(player, region, newMatches,
                 patchMajor, patchMinor = conn.match_exists(
                     str(game['gameId']), region)
                 if patchMajor is not -1:
-                    #print("Data already recorded.")
+                    print("Data already recorded.")
                     if ((patchMajor != core.PATCH_MAJOR) or
                        (patchMinor != core.PATCH_MINOR)):
                         print("No longer on current patch...")
@@ -119,7 +114,6 @@ def matches_collect(player, region, newMatches,
                     '''print("Adding match " + str(game['gameId']) +
                           " to list of new matches.")'''
                     newMatches.append(game['gameId'])
-        #conn.__del__()
         del conn
         newMatches = matches_collect(player, region, newMatches,
                                     beginT - 604800000,
@@ -154,7 +148,6 @@ def main(region):
     conn = db.Connection()
     summList = conn.getSummsComp(region)
     del conn
-    #conn.__del__() todo DEL
     procs = []
     arrs = core.threader(1, summList)
     for grouping in arrs:

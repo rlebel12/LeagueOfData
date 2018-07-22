@@ -6,7 +6,6 @@ Basic interface for performing application functions
 from Recon.Aggregation import collect
 from Recon.Analysis import cache
 from Recon.Analysis.count import count
-from Recon.Aggregation import interfaceAPI as inter
 import sys
 import os
 

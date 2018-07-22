@@ -2,12 +2,14 @@
 Creates two dictionaries located in the bin/ directory mapping itemIDs to item names
 """
 
-from Vitals import *
+from Recon.Utilities import core
+import os
+import pathlib
 
-if __name__ == '__main__'::
+def update():
     url = "https://global.api.pvp.net/api/lol/static-data/na/v1.2/item?api_key=" + KEY
-    response = api_get(url).json()
-    path = str(Path(os.getcwd()).parent) + "\data"
+    response = core.api_get(url).json()
+    path = str(pathlib.Path(os.getcwd()).parent) + "\data"
     nameToId = {}
     idToName = {}
     for each in response['data']:
@@ -16,7 +18,5 @@ if __name__ == '__main__'::
             nameToId[itemName] = each
             idToName[each] = itemName
         except KeyError: pass
-    saveFile(path, "itemNameToId", "json", nameToId)
-    saveFile(path, "itemIdToName", "json", idToName)
-
-main()
+    core.saveFile(path, "itemNameToId", "json", nameToId)
+    core.saveFile(path, "itemIdToName", "json", idToName)

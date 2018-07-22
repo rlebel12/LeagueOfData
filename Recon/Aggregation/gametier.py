@@ -1,4 +1,4 @@
-from Recon.Aggregation import interfaceAPI
+from Recon.Aggregation import players
 from Recon.Utility import database as db
 import datetime
 import math
@@ -19,14 +19,13 @@ def gametier_calc(matchData, region):
         playerID = each['player']['summonerId']
         player = conn.getSumm(playerID, region)
         del conn
-        #conn.__del__()
         try:
             daysSince = datetime.datetime.now() - player[0]['lastUpdated']
             daysSince = daysSince.days
         except IndexError:
             daysSince = 999
         if len(player) == 0 or daysSince >= LAST_UPDATED_THRESHOLD:
-            found = interfaceAPI.getRanksFromLeague(region, playerID)
+            found = players.getRanksFromLeague(region, playerID)
             if found == -1:
                 tot -= 1
                 continue
@@ -34,7 +33,6 @@ def gametier_calc(matchData, region):
                 conn = db.Connection()
                 player = conn.getSumm(playerID, region)
                 del conn
-                #conn.__del__()
                 if len(player) == 0:
                     tot -= 1
                     continue
@@ -53,9 +51,9 @@ def gametier_calc(matchData, region):
     if masters >= 5:
         tierScore = 6
     else:
-        if avg > 6.25:  # Somewhat arbitrary average
+        if avg > 6.25:
             tierScore = 7
-        elif avg > 6:  # Somewhat arbitrary average
+        elif avg > 6:
             tierScore = 6
         else:
             tierScore = math.floor(avg)

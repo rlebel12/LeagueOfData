@@ -2,32 +2,18 @@
 Creates two dictionaries located in the bin/ directory mapping championIDs to champion names
 """
 
-import inspect
-import database as db
-import Header as H
+from Recon.Utility import database as db
+from Recon.Utility import core
+import pathblib
+import os
 
 
-def test():
-    path = str(H.Path(H.os.getcwd()).parent) + '\data'
-    champs = H.loadJSON(path, "champIdToName")
-    ids = H.loadJSON(path, "champNameToId")
-    '''x = input("Enter Champ ID: ")
-    print(champs[x])
-    x = input("Enter champ name: ")
-    print(ids[x])'''
 
-    conn = db.Connection()
-    query = "INSERT INTO ChampCache (champ, patchMajor, patchMinor, region, totalWRStats) VALUES (%s, 7, %s, 'NA1', 0)"
-    for id in champs.keys():
-        for patch in [17,16]:
-            conn.execute(query,(id,patch))
-
-
-if __name__ == '__main__':
+def update():
     url = ("https://na1.api.riotgames.com/lol/static-data/v3/" +
            "champions?locale=en_US&dataById=false")
-    response = H.api_get(url).json()
-    path = str(H.Path(H.os.getcwd()).parent) + "\data"
+    response = core.api_get(url).json()
+    path = str(pathlib.Path(core.os.getcwd()).parent) + "\data"
     nameToId = {}
     idToName = {}
     conn = db.Connection()
@@ -40,5 +26,5 @@ if __name__ == '__main__':
         conn.execute(query, (id, name))
         nameToId[response['data'][each]['name']] = response['data'][each]['id']
         idToName[response['data'][each]['id']] = response['data'][each]['name']
-    H.saveFile(path, "champNameToId", "json", nameToId)
-    H.saveFile(path, "champIdToName", "json", idToName)
+    core.saveFile(path, "champNameToId", "json", nameToId)
+    core.saveFile(path, "champIdToName", "json", idToName)

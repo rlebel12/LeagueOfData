@@ -117,6 +117,3 @@ def threader(numThreads, arrayToSplit):
     return arrs
 
 champMasterList = list(getChampNameToIdDict().keys())
-
-# Account ID for Cryce: 38396085
-# Player ID for Cryce: 24137697

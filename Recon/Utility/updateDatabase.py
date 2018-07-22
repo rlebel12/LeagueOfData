@@ -1,5 +1,5 @@
-import Header as H
-import database as db
+from Recon.Utilities import core
+from Recon.Utilities import database as db
 
 
 # Updates every summoner that has not been updated in a week
@@ -47,7 +47,7 @@ def updateSumms(region):
         id = int(each['playerID'])
         print("Updating player " + str(id))
         #print("Old data for " + each['playerName'] + ": " + each['playerTier'] + " " + each['playerDivision'])
-        name, tier, div = H.getPlayerInfo(id, region)
+        name, tier, div = core.getPlayerInfo(id, region)
         print("New data for " + name + ": " + tier + " " + div + "\n")
         execute(crs, update,(tier,div,name,id,region))
     crs.close()

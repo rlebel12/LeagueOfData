@@ -4,7 +4,7 @@ from Recon.Utility import queue as Queue
 import threading
 
 
-def updatePlayerRank(summList, player, found, queue, tier, baseRegion, region, leagueID):
+def updatePlayerRank(summList, player, found, queue, tier, baseRegion, region, leagueID, verbose=False):
     updated = 0
     added = 0
     for entry in summList:
@@ -14,8 +14,8 @@ def updatePlayerRank(summList, player, found, queue, tier, baseRegion, region, l
             found = 1
             queue.put(found)
         name = entry['playerOrTeamName']
-        #print("Adding/Updating: " + str(playerID))
-
+        if verbose:
+            print("Adding/Updating: " + str(playerID))
         # Champion mastery stats, not currently in use, but was functional
         '''url = "https://" + baseRegion + ".api.riotgames.com/championmastery/location/" + region + "/player/" + playerID + "/champions?api_key=" + KEY
         masteryData = api_get(url).json()
@@ -27,15 +27,15 @@ def updatePlayerRank(summList, player, found, queue, tier, baseRegion, region, l
         conn = db.Connection(0)
         action = conn.addOrUpdateSumm(playerID, name,
                                       tier, div, baseRegion)
-        #conn.__del__()
         del conn
         if action == 0:
             added += 1
         elif action == 1:
             updated += 1
     return found
-    # print("Updated: " + str(updated))
-    # print("Added: " + str(added))
+    if verbose:
+        print("Updated: " + str(updated))
+        print("Added: " + str(added))
 
 
 def getRanksFromLeague(region, player):
