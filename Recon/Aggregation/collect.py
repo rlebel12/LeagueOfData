@@ -39,12 +39,12 @@ def match_data_get(id, region):
                     patchMinor != core.PATCH_MINOR):
                     print("Game is not on current patch...")
                     conn = db.Connection()
-                    conn.match_add(id, tier,
+                    conn.match_save(id, tier,
                                    patchMajor, patchMinor, region, None)
                     del conn
                     return -2, -2, -2, -2
             conn = db.Connection()
-            key = conn.match_add(id, tier, patchMajor, patchMinor, region, data)
+            key = conn.match_save(id, tier, patchMajor, patchMinor, region, data)
             del conn
             return response, tier, key, players
         except AttributeError as e:
@@ -57,7 +57,7 @@ def match_data_get(id, region):
         tier = matchInfo['rank']
         key = matchInfo['gameKey']
         conn = db.Connection()
-        if not conn.match_stats_full(key):
+        if not conn.champ_stats_full(key):
             data = conn.match_data_get(key)
             return data, tier, key
         else:
@@ -146,7 +146,7 @@ def processWorker(region, summList, add_stats=True):
 # feeds portions of the list to separatred processes
 def main(region):
     conn = db.Connection()
-    summList = conn.getSummsComp(region)
+    summList = conn.players_elite_get(region)
     del conn
     procs = []
     arrs = core.threader(1, summList)

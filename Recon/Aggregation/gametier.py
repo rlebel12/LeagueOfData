@@ -17,7 +17,7 @@ def gametier_calc(matchData, region):
     for each in matchData['participantIdentities']:
         conn = db.Connection()
         playerID = each['player']['summonerId']
-        player = conn.getSumm(playerID, region)
+        player = conn.player_get(playerID, region)
         del conn
         try:
             daysSince = datetime.datetime.now() - player[0]['lastUpdated']
@@ -31,7 +31,7 @@ def gametier_calc(matchData, region):
                 continue
             else:
                 conn = db.Connection()
-                player = conn.getSumm(playerID, region)
+                player = conn.player_get(playerID, region)
                 del conn
                 if len(player) == 0:
                     tot -= 1

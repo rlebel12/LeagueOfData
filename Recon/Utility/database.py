@@ -67,7 +67,7 @@ class Connection:
             print("SQL Error Encountered.  errorKey: " + str(errorKey))
             return None
 
-    def addOrUpdateSumm(self, id, name, tier, div, region):
+    def player_save(self, id, name, tier, div, region):
         query = '''
         SELECT playerKey FROM Player WHERE region = %s AND summonerID = %s;
         '''
@@ -95,7 +95,7 @@ class Connection:
                                   datetime.datetime.now(), id, region))
             return 1
 
-    def getSumm(self, id, region):
+    def player_get(self, id, region):
         query = '''
         SELECT * FROM Player
         WHERE summonerID = %s AND region = %s
@@ -103,16 +103,7 @@ class Connection:
         '''
         return self.execute(query, (id, region))
 
-    # Returns list of all summoner IDs
-    def getSumms(self, region):
-        summList = []
-        query = "SELECT * FROM Player WHERE region = %s LIMIT 1;"
-        summs = self.execute(query, (region))
-        for each in summs:
-            summList.append(each['id'])
-        return summList
-
-    def getSummsComp(self, region):
+    def players_elite_get(self, region):
         summList = []
         query = '''
         SELECT summonerID, accountID FROM Player
@@ -125,7 +116,7 @@ class Connection:
                              'accountID': each['accountID']})
         return summList
 
-    def getCompMatches(self, region):
+    def matches_elite_get(self, region):
         query = '''
         SELECT gameKey, gameID, dateAdded FROM Game
         WHERE rank >= 4
@@ -144,7 +135,7 @@ class Connection:
         results = self.execute(query, (key))
         return json.loads(results[0]['data'])
 
-    def match_add(self, id, rank, patchMajor, patchMinor, region, data):
+    def match_save(self, id, rank, patchMajor, patchMinor, region, data):
         query = '''
         INSERT INTO Game(gameID, rank, patchMajor, patchMinor, region)
         VALUES (%s,%s,%s,%s,%s);
@@ -177,7 +168,9 @@ class Connection:
         '''
         return self.execute(query, (id, region))
 
-    def match_stats_full(self, key):
+    # Checks to see if there are 10 rows in the stats table corresponding
+    # to the given match.  If False, then not all stats have been added yet.
+    def champ_stats_full(self, key):
         query = '''
         SELECT COUNT(*) AS 'count' FROM ChampStats
         WHERE gameKey = %s GROUP BY gameKey
@@ -190,7 +183,9 @@ class Connection:
         else:
             return False
 
-    def getCompMatchesByChamp(self, patchMajor, patchMinor, region, champ):
+    # Used by stat cache function.  Finds all stat rows for given champion
+    # from a given region on a given patch.
+    def champ_stats_get(self, patchMajor, patchMinor, region, champ):
         query = '''SELECT s.* FROM Game g INNER JOIN ChampStats s
             ON g.gameKey = s.gameKey
             WHERE g.rank >= 4 AND g.patchMajor = %s
@@ -201,7 +196,7 @@ class Connection:
         return self.execute(query, (core.PATCH_MAJOR,
                             core.PATCH_MINOR, region, champ))
 
-    def champ_stats_insert(self, key, champId, playerKey, role,
+    def champ_stats_save(self, key, champId, playerKey, role,
                       duration, win, stats):
         query = '''
         INSERT INTO ChampStats (gameKey, champ, playerKey, role, duration,

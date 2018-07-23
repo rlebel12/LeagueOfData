@@ -82,7 +82,7 @@ def createCharacterCharts(arr, group):
         for entry in arr:
             conn = db.Connection()
             champID = entry['champID']
-            matches = conn.getCompMatchesByChamp(core.PATCH_MAJOR, core.PATCH_MINOR, region, champID)
+            matches = conn.champ_stats_get(core.PATCH_MAJOR, core.PATCH_MINOR, region, champID)
             timeTotal = {}
             winTotal = {}
             statSummary = {}

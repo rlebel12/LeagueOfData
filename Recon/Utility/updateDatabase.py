@@ -53,7 +53,7 @@ def updateSumms(region):
     crs.close()
     db.close()
 
-
+# TODO: Update this to not pull entire region
 # Clears old Master/Challenger entries, updates summoners already in table who are now M/C, then adds remaining M/C
 def updateTopSumms(region):
     conn = db.connect()
@@ -84,7 +84,7 @@ def updateTopSumms(region):
     print("Updating " + region + "...")
 
     topSumms = conn.execute(getTop, (region))
-    allSummoners = getSumms(crs, region)
+    #allSummoners = getSumms(crs, region)
     masters = api_get("https://" + region + ".api.pvp.net/api/lol/" + region + "/v2.5/league/master?type=RANKED_SOLO_5x5&api_key=" + KEY).json()
     for each in masters['entries']:
         tier = 'MASTER'

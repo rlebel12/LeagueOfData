@@ -25,7 +25,7 @@ def updatePlayerRank(summList, player, found, queue, tier, baseRegion, region, l
                 if key in masteryData[i]: del masteryData[i][key]
         #masteryData = json.dumps(masteryData)'''
         conn = db.Connection(0)
-        action = conn.addOrUpdateSumm(playerID, name,
+        action = conn.player_save(playerID, name,
                                       tier, div, baseRegion)
         del conn
         if action == 0:
@@ -91,10 +91,10 @@ def getRanksFromLeague(region, player):
                 for key in keys:
                     if key in masteryData[i]: del masteryData[i][key]
             #masteryData = json.dumps(masteryData)
-            #action = addOrUpdateSummCRS(crs, playerID, name, tier, div, baseRegion, masteryData)
+            #action = player_saveCRS(crs, playerID, name, tier, div, baseRegion, masteryData)
 
 
-            action = addOrUpdateSummCRS(crs, playerID, name, tier, div, baseRegion, None)
+            action = player_saveCRS(crs, playerID, name, tier, div, baseRegion, None)
             if action == 0: added+=1
             elif action == 1: updated+=1
         #print(("Updated: " + str(updated))

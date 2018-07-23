@@ -41,7 +41,7 @@ def champ_stats_add(stats):
     champId = stats['champId']
     statSummary = stats['statSummary']
     conn = db.Connection()
-    conn.champ_stats_insert(key, champId, playerKey, lane, dur, win, statSummary)
+    conn.champ_stats_save(key, champId, playerKey, lane, dur, win, statSummary)
     del conn
     #conn.__del__()
 
@@ -112,7 +112,7 @@ def matchesToTrackerWorker(matchList, region):
     conn = db.Connection()
     newMatches = []
     for each in matchList:
-        full = conn.match_stats_full(each['gameKey'])
+        full = conn.champ_stats_full(each['gameKey'])
         if not full:
             newMatches.append(each['gameID'])
     del conn
@@ -123,7 +123,7 @@ def matchesToTrackerWorker(matchList, region):
 # champion winrate table
 def matchesToTracker(region):
     conn = db.Connection()
-    response = conn.getCompMatches(region)
+    response = conn.matches_elite_get(region)
     del conn
     #conn.__del__()
     matchesToTrackerWorker(response, region)
