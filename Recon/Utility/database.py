@@ -116,7 +116,7 @@ class Connection:
                              'accountID': each['accountID']})
         return summList
 
-    def matches_elite_get(self, region):
+    def games_elite_get(self, region):
         query = '''
         SELECT gameKey, gameID, dateAdded FROM Game
         WHERE rank >= 4
@@ -126,7 +126,7 @@ class Connection:
         return self.execute(
             query, (core.PATCH_MAJOR, core.PATCH_MINOR, region))
 
-    def match_data_get(self, key):
+    def game_data_get(self, key):
         query = '''
         SELECT data from GameData
         WHERE gameKey = %s
@@ -135,7 +135,7 @@ class Connection:
         results = self.execute(query, (key))
         return json.loads(results[0]['data'])
 
-    def match_save(self, id, rank, patchMajor, patchMinor, region, data):
+    def game_save(self, id, rank, patchMajor, patchMinor, region, data):
         query = '''
         INSERT INTO Game(gameID, rank, patchMajor, patchMinor, region)
         VALUES (%s,%s,%s,%s,%s);
@@ -147,7 +147,7 @@ class Connection:
         self.execute(insertData, (gameKey, data))
         return gameKey
 
-    def match_exists(self, id, region):
+    def game_exists(self, id, region):
         query = '''
         SELECT patchMajor, patchMinor FROM Game
         WHERE region = %s AND gameID = %s
@@ -160,7 +160,7 @@ class Connection:
             results = results[0]
             return results['patchMajor'], results['patchMinor']
 
-    def match_info_get(self, id, region):
+    def game_info_get(self, id, region):
         query = '''
         SELECT gameKey, rank FROM Game
         WHERE gameID = %s AND region = %s

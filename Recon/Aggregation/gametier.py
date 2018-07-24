@@ -9,52 +9,52 @@ LAST_UPDATED_THRESHOLD = 7  # Days before player needs to update
 # Checks tier for ranked game by examining 'average' player rank.
 # Returns True if tier is at least Platinum
 def gametier_calc(matchData, region):
-    playerKeys = {}
-    avg = 0
-    tot = 10
+    player_keys = {}
+    sum = 0
+    total = 10
     masters = 0
     challengers = 0
     for each in matchData['participantIdentities']:
         conn = db.Connection()
-        playerID = each['player']['summonerId']
-        player = conn.player_get(playerID, region)
+        player_id = each['player']['summonerId']
+        player = conn.player_get(player_id, region)
         del conn
         try:
-            daysSince = datetime.datetime.now() - player[0]['lastUpdated']
-            daysSince = daysSince.days
+            last_updated = datetime.datetime.now() - player[0]['lastUpdated']
+            last_updated = last_updated.days
         except IndexError:
-            daysSince = 999
-        if len(player) == 0 or daysSince >= LAST_UPDATED_THRESHOLD:
-            found = players.getRanksFromLeague(region, playerID)
+            last_updated = 999
+        if len(player) == 0 or last_updated >= LAST_UPDATED_THRESHOLD:
+            found = players.getRanksFromLeague(region, player_id)
             if found == -1:
-                tot -= 1
+                total -= 1
                 continue
             else:
                 conn = db.Connection()
-                player = conn.player_get(playerID, region)
+                player = conn.player_get(player_id, region)
                 del conn
                 if len(player) == 0:
-                    tot -= 1
+                    total -= 1
                     continue
         player = player[0]
-        playerKeys[player['summonerID']] = player['playerKey']
+        player_keys[player['summonerID']] = player['playerKey']
         tier = player['tier']
         div = player['division']
         if ((tier == 6) or (tier == 7)):
             div = 5
-        avg += tier
-        avg += 0.2 * (5 - div)
+        sum += tier
+        sum += 0.2 * (5 - div)
 
-    avg = avg / tot
+    mean = sum / total
     if challengers >= 5:
-        tierScore = 7
+        tier_score = 7
     if masters >= 5:
-        tierScore = 6
+        tier_score = 6
     else:
-        if avg > 6.25:
-            tierScore = 7
-        elif avg > 6:
-            tierScore = 6
+        if mean > 6.25:
+            tier_score = 7
+        elif mean > 6:
+            tier_score = 6
         else:
-            tierScore = math.floor(avg)
-    return tierScore, playerKeys
+            tier_score = math.floor(mean)
+    return tier_score, player_keys

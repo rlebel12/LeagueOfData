@@ -35,7 +35,7 @@ if __name__ == '__main__':
                 '''region = input("[NA1, KR]: ").upper()
                 while region not in ['NA1', 'KR']:
                     region = input("[NA1, KR]: ").upper()'''
-                collect.main('KR')
+                collect.collect_region('KR')
             except KeyboardInterrupt:
                 pass
         elif choice == 2:
@@ -62,7 +62,7 @@ if __name__ == '__main__':
                 while region.upper() not in ['NA1', 'KR']:
                     region = input("Invalid region.  Please",
                                    "try again [NA1, KR]: ").upper()
-                addWinStats.matchesToTracker(region.upper())
+                addWinStats.parse_stats(region.upper())
             except KeyboardInterrupt:
                 pass
         elif choice == 5:
