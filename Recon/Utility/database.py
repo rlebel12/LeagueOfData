@@ -107,7 +107,7 @@ class Connection:
         summList = []
         query = '''
         SELECT summonerID, accountID FROM Player
-        WHERE region = %s AND tier >= 4
+        WHERE region = %s AND tier >= 4 AND division <= 2
         ORDER BY tier DESC, lastUpdated ASC;
         '''
         summs = self.execute(query, (region))

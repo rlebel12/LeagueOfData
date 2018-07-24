@@ -29,13 +29,15 @@ if __name__ == '__main__':
         else:
             choice = sys.argv[1]
             pid = os.getpid()
-            print("Master PID: " + str(pid))
         if choice == 1:
             try:
-                '''region = input("[NA1, KR]: ").upper()
+                if len(sys.argv) == 3:
+                    region = sys.argv[2]
+                else:
+                    region = input("[NA1, KR]: ").upper()
                 while region not in ['NA1', 'KR']:
-                    region = input("[NA1, KR]: ").upper()'''
-                collect.collect_region('KR')
+                    region = input("[NA1, KR]: ").upper()
+                collect.collect_region('NA1')
             except KeyboardInterrupt:
                 pass
         elif choice == 2:
