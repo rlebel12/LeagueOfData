@@ -96,10 +96,10 @@ def loadJSON(directory, file):
     return data
 
 def getChampIdToNameDict():
-    return loadJSON(str(pathlib.Path(os.getcwd())) + "\data", 'champIdToName')
+    return loadJSON(str(pathlib.Path(os.getcwd())) + "\Data", 'champIdToName')
 
 def getChampNameToIdDict():
-    return loadJSON(str(pathlib.Path(os.getcwd())) + "\data", 'champNameToId')
+    return loadJSON(str(pathlib.Path(os.getcwd())) + "\Data", 'champNameToId')
 
 
 # Prepares groups of variables for threading (or multiprocessing)
