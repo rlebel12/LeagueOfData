@@ -27,8 +27,7 @@ if __name__ == '__main__':
             while ((choice < 1 or choice > numOptions) and (choice != 100)):
                 choice = int(input("Invalid choice.  Please try again: "))
         else:
-            choice = sys.argv[1]
-            pid = os.getpid()
+            choice = int(sys.argv[1])
         if choice == 1:
             try:
                 if len(sys.argv) == 3:
