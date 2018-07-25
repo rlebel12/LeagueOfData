@@ -76,7 +76,14 @@ def api_get(url):
         response = api_get(url)
     return response
 
-#Stores JSON object to given location
+
+def windowsDirToLinux(directory):
+    directory = directory.split('\\')
+    directory = '/'.join(directory)
+    return directory
+
+
+# Stores JSON object to given location
 def saveFile(path, name, format, data):
     completeName = os.path.join(path, name+"."+format)
     with open(completeName, 'w') as file:
