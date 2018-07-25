@@ -126,7 +126,7 @@ def parse_stats(region):
     del conn
     parse_stats_worker(games, region)
     core.sys.exit()  # TODO delete this and above line
-    games_split = core.threader(6, games)
+    games_split = core.splitter(6, games)
     threads = []
     for game_group in games_split:
         thread = threading.Thread(target=parse_stats_worker,
