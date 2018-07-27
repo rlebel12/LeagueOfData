@@ -13,7 +13,6 @@ import os
 class Connection:
     def __init__(self, commit=1):
         tries = 0
-        self.delF = 0
         conn_info = json.loads(os.environ['RECON_DB_CONNECTION'])
         try:
             tries += 1
@@ -30,41 +29,42 @@ class Connection:
         # print("Connection established (" + str(tries) + " attempts)")
         self.crs = self.db.cursor()
         self.commit = commit
+        self.is_closed = False
 
     def __del__(self):
-        if not self.delF:
+        if not self.is_closed:
             if self.commit == 0:
                 self.db.commit()
             self.crs.close()
             self.db.close()
-            self.delF = 1
+            self.is_closed = True
 
     def execute(self, *args):
         query = args[0]
-        argsFlag = 0
+        extra_args = False
         if len(args) > 1:
-            argsFlag = 1
+            extra_args = True
             variables = args[1]
         try:
-            if argsFlag:
+            if extra_args:
                 self.crs.execute(query, args[1])
             else:
                 self.crs.execute(query)
             return self.crs.fetchall()
         except:
-            e = sys.exc_info()
-            errInsert = '''
+            error = sys.exc_info()
+            error_insert_query = '''
             INSERT INTO ErrorLog(errorMsg, queryText, queryVariables)
             VALUES (%s, %s, %s)
             '''
-            if argsFlag:
-                self.crs.execute(errInsert,
-                                 (str(e), str(query), str(variables)))
+            if extra_args:
+                self.crs.execute(error_insert_query,
+                                 (str(error), str(query), str(variables)))
             else:
-                self.crs.execute(errInsert, (str(e), str(query), None))
-            getKey = "SELECT LAST_INSERT_ID();"
-            errorKey = self.execute(getKey, ())[0]['LAST_INSERT_ID()']
-            print("SQL Error Encountered.  errorKey: " + str(errorKey))
+                self.crs.execute(errInsert, (str(error), str(query), None))
+            error_key_query = "SELECT LAST_INSERT_ID();"
+            error_key = self.execute(error_key_query, ())[0]['LAST_INSERT_ID()']
+            print("SQL Error Encountered.  errorKey: " + str(error_key))
             return None
 
     def player_save(self, id, name, tier, div, region):
@@ -135,17 +135,17 @@ class Connection:
         results = self.execute(query, (key))
         return json.loads(results[0]['data'])
 
-    def game_save(self, id, rank, patchMajor, patchMinor, region, data):
+    def game_save(self, id, rank, patch_major, patch_minor, region, data):
         query = '''
         INSERT INTO Game(gameID, rank, patchMajor, patchMinor, region)
         VALUES (%s,%s,%s,%s,%s);
         '''
-        getKey = "SELECT LAST_INSERT_ID();"
-        self.execute(query, (id, rank, patchMajor, patchMinor, region))
-        gameKey = self.execute(getKey, ())[0]['LAST_INSERT_ID()']
-        insertData = "INSERT INTO GameData(gameKey, data) VALUES (%s, %s)"
-        self.execute(insertData, (gameKey, data))
-        return gameKey
+        key_query = "SELECT LAST_INSERT_ID();"
+        self.execute(query, (id, rank, patch_major, patch_minor, region))
+        key = self.execute(key_query, ())[0]['LAST_INSERT_ID()']
+        query = "INSERT INTO GameData(gameKey, data) VALUES (%s, %s)"
+        self.execute(query, (key, data))
+        return key
 
     def game_exists(self, id, region):
         query = '''
@@ -196,7 +196,7 @@ class Connection:
         return self.execute(query, (core.PATCH_MAJOR,
                             core.PATCH_MINOR, region, champ))
 
-    def champ_stats_save(self, key, champId, playerKey, role,
+    def champ_stats_save(self, game_key, champ_id, player_key, role,
                       duration, win, stats):
         query = '''
         INSERT INTO ChampStats (gameKey, champ, playerKey, role, duration,
@@ -208,17 +208,17 @@ class Connection:
         totalHeal, totalDamageTaken, turretKills) VALUES %s
         '''
         # THIS ORDER MATTERS, MUST MATCH KEYS FROM addWinStats()!
-        args = [key, champId, playerKey, role, duration, win]
+        args = [game_key, champ_id, player_key, role, duration, win]
         for each in stats:
             args.append(each)
         args = tuple(args)
         self.execute(query, (args,))
 
 
-divisionDB = {5: 'V', 4: 'IV', 3: 'III', 2: 'II', 1: 'I'}
-tierDB = {
+division_from_db = {5: 'V', 4: 'IV', 3: 'III', 2: 'II', 1: 'I'}
+tier_from_db = {
     1: 'BRONZE', 2: 'SILVER', 3: 'GOLD', 4: 'PLATINUM',
     5: 'DIAMOND', 6: 'MASTER', 7: 'CHALLENGER'
 }
-divisionAPI = {v: k for k, v in divisionDB.items()}
-tierAPI = {v: k for k, v in tierDB.items()}
+division_from_api = {v: k for k, v in division_from_db.items()}
+tier_from_api = {v: k for k, v in tier_from_db.items()}

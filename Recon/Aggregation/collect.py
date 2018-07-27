@@ -146,7 +146,7 @@ def collect_region(region):
     players = conn.players_elite_get(region)
     del conn
     processes = []
-    players_split = core.threader(4, players)
+    players_split = core.splitter(1, players)
     for player_group in players_split:
         process = multiprocessing.Process(target=collect_region_worker,
                                       args=(region, player_group,))
