@@ -6,6 +6,7 @@ Basic interface for performing application functions
 from Recon.Aggregation import collect
 from Recon.Analysis import cache
 from Recon.Analysis.count import count
+from Recon.Utility import champDict as cd
 import sys
 import os
 
@@ -13,7 +14,7 @@ import os
 if __name__ == '__main__':
     while(1):
         if len(sys.argv) == 1:
-            numOptions = 7
+            numOptions = 8
             print("\nOptions: ")
             print("[1]: Add match data")
             print("[2]: Update Challenger and Master tiers")
@@ -21,6 +22,7 @@ if __name__ == '__main__':
             print("[4]: Fill character tracker from matches")
             print("[5]: Count recorded matches and players")
             print("[6]: Fill character cache")
+            print("[7]: Update champion hash table")
             print("[" + str(numOptions) + "]: Exit")
 
             choice = int(input("\nPlease enter a choice: "))
@@ -70,6 +72,8 @@ if __name__ == '__main__':
             count()
         elif choice == 6:
             charCache.main()
+        elif choice == 7:
+            cd.update()
         elif choice == numOptions:
             sys.exit()
         print()

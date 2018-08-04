@@ -4,7 +4,7 @@ Creates two dictionaries located in the bin/ directory mapping championIDs to ch
 
 from Recon.Utility import database as db
 from Recon.Utility import core
-import pathblib
+import pathlib
 import os
 
 
@@ -13,7 +13,7 @@ def update():
     url = ("https://na1.api.riotgames.com/lol/static-data/v3/" +
            "champions?locale=en_US&dataById=false")
     response = core.api_get(url).json()
-    path = str(pathlib.Path(core.os.getcwd()).parent) + "\data"
+    path = str(pathlib.Path(core.os.getcwd())) + "\Data"
     nameToId = {}
     idToName = {}
     conn = db.Connection()
