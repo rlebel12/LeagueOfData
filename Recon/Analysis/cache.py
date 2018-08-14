@@ -129,7 +129,7 @@ def main():
     conn = db.Connection()
     group = 'COMPETITIVE'
     arrs = conn.execute("SELECT * FROM ChampHash")
-    arrs = core.threader(10, arrs)
+    arrs = core.splitter(10, arrs)
     threads = []
     for each in arrs:
         t = core.threading.Thread(target=createCharacterCharts, args=(each, group))

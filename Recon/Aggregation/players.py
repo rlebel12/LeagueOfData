@@ -4,20 +4,20 @@ from Recon.Utility import queue as Queue
 import threading
 
 
-def updatePlayerRank(summList, player, found, queue, tier, baseRegion, region, leagueID, verbose=False):
+def updatePlayerRank(players, target_player, target_found, queue, tier, region_base, region, league_id, verbose=False):
     updated = 0
     added = 0
-    for entry in summList:
-        div = db.divisionAPI[entry['rank']]
-        playerID = int(entry['playerOrTeamId'])
-        if playerID == player:
-            found = 1
-            queue.put(found)
-        name = entry['playerOrTeamName']
+    for player in players:
+        div = db.division_from_api[player['rank']]
+        player_id = int(player['playerOrTeamId'])
+        if player_id == target_player:
+            target_found = True
+            queue.put(target_found)
+        name = player['playerOrTeamName']
         if verbose:
-            print("Adding/Updating: " + str(playerID))
+            print("Adding/Updating: " + str(player_id))
         # Champion mastery stats, not currently in use, but was functional
-        '''url = "https://" + baseRegion + ".api.riotgames.com/championmastery/location/" + region + "/player/" + playerID + "/champions?api_key=" + KEY
+        '''url = "https://" + region_base + ".api.riotgames.com/championmastery/location/" + region + "/player/" + player_id + "/champions?api_key=" + KEY
         masteryData = api_get(url).json()
         keys = ['chestGranted','championPoints','playerId','championPointsUntilNextLevel','championPointsSinceLastLevel','lastPlayTime','tokensEarned']
         for i in range(len(masteryData)):
@@ -25,14 +25,14 @@ def updatePlayerRank(summList, player, found, queue, tier, baseRegion, region, l
                 if key in masteryData[i]: del masteryData[i][key]
         #masteryData = json.dumps(masteryData)'''
         conn = db.Connection(0)
-        action = conn.player_save(playerID, name,
-                                      tier, div, baseRegion)
+        action = conn.player_save(player_id, name,
+                                      tier, div, region_base)
         del conn
         if action == 0:
             added += 1
         elif action == 1:
             updated += 1
-    return found
+    return target_found
     if verbose:
         print("Updated: " + str(updated))
         print("Added: " + str(added))
@@ -40,65 +40,64 @@ def updatePlayerRank(summList, player, found, queue, tier, baseRegion, region, l
 
 def getRanksFromLeague(region, player):
     queue = Queue.Queue()
-    found = -1
-    foundF = -1
+    target_found = False
     url = "https://" + region.lower() + ".api.riotgames.com/lol/league/v3/positions/by-summoner/" + str(player)
-    leagueData = core.api_get(url)
-    if leagueData is None:
-        return found
-    league = leagueData.json()
-    baseRegion = region
+    player_leagues = core.api_get(url)
+    if player_leagues is None:
+        return target_found
+    league = player_leagues.json()
+    region_base = region
     if region in ['BR', 'OC', 'JP', 'NA', 'EUN', 'EUW', 'TR']:
         region = region + "1"
-    for each in league:  # Only one loop
+    for each in league:
         if each['queueType'] != 'RANKED_SOLO_5x5':
             continue
         print("Pulling data from league.  This might take a little while...")
-        tier = db.tierAPI[each['tier']]
-        leagueID = each['leagueId']
-        url = "https://" + region.lower() + ".api.riotgames.com/lol/league/v3/leagues/" + str(leagueID)
-        leagueData = core.api_get(url).json()
+        tier = db.tier_from_api[each['tier']]
+        league_id = each['leagueId']
+        url = "https://" + region.lower() + ".api.riotgames.com/lol/league/v3/leagues/" + str(league_id)
+        league_data = core.api_get(url).json()
         # Prepare for threading
         threads = []
-        arrs = core.threader(5, leagueData['entries'])
-        # found = updatePlayerRank(each['entries'], player, found, queue, tier,
-                                # baseRegion, region)
+        arrs = core.splitter(5, league_data['entries'])
+        # target_found = updatePlayerRank(each['entries'], player, target_found, queue, tier,
+                                # region_base, region)
         # print(("Creating threads to get player ranks in PID " + str(os.getpid()))
         for leaguePlayer in arrs:
             t = threading.Thread(target=updatePlayerRank,
-                                   args=(leaguePlayer, player, found, queue,
-                                         tier, baseRegion, region, leagueID))
+                                   args=(leaguePlayer, player, target_found, queue,
+                                         tier, region_base, region, league_id))
             # t.daemon = True
             threads.append(t)
             t.start()
         for t in threads:
             t.join()
-        found = queue.get()
+        target_found = queue.get()
 
         '''
         for entry in each['entries']:
             div = entry['division']
-            playerID = entry['playerOrTeamId']
-            if playerID == player:
-                found = 1
+            player_id = entry['playerOrTeamId']
+            if player_id == player:
+                target_found = 1
             name = entry['playerOrTeamName']
 
             # Champion mastery stats
-            url = "https://" + baseRegion + ".api.riotgames.com/championmastery/location/" + region + "/player/" + playerID + "/champions?api_key=" + KEY
+            url = "https://" + region_base + ".api.riotgames.com/championmastery/location/" + region + "/player/" + player_id + "/champions?api_key=" + KEY
             masteryData = api_get(url).json()
-            keys = ['chestGranted','championPoints','playerId','championPointsUntilNextLevel','championPointsSinceLastLevel','lastPlayTime','tokensEarned']
+            keys = ['chestGranted','championPoints','player_id','championPointsUntilNextLevel','championPointsSinceLastLevel','lastPlayTime','tokensEarned']
             for i in range(len(masteryData)):
                 for key in keys:
                     if key in masteryData[i]: del masteryData[i][key]
             #masteryData = json.dumps(masteryData)
-            #action = player_saveCRS(crs, playerID, name, tier, div, baseRegion, masteryData)
+            #action = player_saveCRS(crs, player_id, name, tier, div, region_base, masteryData)
 
 
-            action = player_saveCRS(crs, playerID, name, tier, div, baseRegion, None)
+            action = player_saveCRS(crs, player_id, name, tier, div, region_base, None)
             if action == 0: added+=1
             elif action == 1: updated+=1
         #print(("Updated: " + str(updated))
         #print(("Added: " + str(added))
         '''
-
-    return found
+        break
+    return target_found

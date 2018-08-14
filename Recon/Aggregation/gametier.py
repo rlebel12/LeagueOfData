@@ -8,13 +8,13 @@ LAST_UPDATED_THRESHOLD = 7  # Days before player needs to update
 
 # Checks tier for ranked game by examining 'average' player rank.
 # Returns True if tier is at least Platinum
-def gametier_calc(matchData, region):
+def gametier_calc(game_data, region):
     player_keys = {}
     sum = 0
     total = 10
     masters = 0
     challengers = 0
-    for each in matchData['participantIdentities']:
+    for each in game_data['participantIdentities']:
         conn = db.Connection()
         player_id = each['player']['summonerId']
         player = conn.player_get(player_id, region)
@@ -26,7 +26,7 @@ def gametier_calc(matchData, region):
             last_updated = 999
         if len(player) == 0 or last_updated >= LAST_UPDATED_THRESHOLD:
             found = players.getRanksFromLeague(region, player_id)
-            if found == -1:
+            if not found:
                 total -= 1
                 continue
             else:

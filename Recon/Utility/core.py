@@ -109,8 +109,8 @@ def getChampNameToIdDict():
     return loadJSON(str(pathlib.Path(os.getcwd())) + "\Data", 'champNameToId')
 
 
-# Prepares groups of variables for threading (or multiprocessing)
-def threader(numThreads, arrayToSplit):
+# Splits a list into groupings for threading/multiprocessing
+def splitter(numThreads, arrayToSplit):
     length = int(len(arrayToSplit)/numThreads)
     i = 0
     arrs = []
