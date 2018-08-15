@@ -102,8 +102,8 @@ def games_collect(player, region, new_games,
                     str(game['gameId']), region)
                 if patch_major is not -1:
                     print("Data already recorded.")
-                    if ((patch_major != core.PATCH_MAJOR) or
-                       (patch_minor != core.PATCH_MINOR)):
+                    if ((patch_major < core.PATCH_MAJOR) or
+                       (patch_minor < core.PATCH_MINOR)):
                         print("No longer on current patch...")
                         return new_games
                     streak += 1
