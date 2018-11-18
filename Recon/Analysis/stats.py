@@ -42,7 +42,7 @@ def champ_stats_add(stats):
     champ_stats = stats['champ_stats']
     conn = db.Connection()
     conn.champ_stats_save(key, champ_id, player_key, lane, duration, win, champ_stats)
-    del conn
+    conn.close()
 
 # For a list of matches, retrieves data for each match (either from my DB
 # or using Riot API).  After retrieving data, parses out information
@@ -114,7 +114,7 @@ def parse_stats_worker(games_master, region):
         full = conn.champ_stats_full(each['gameKey'])
         if not full:
             games_incomplete.append(each['gameID'])
-    del conn
+    conn.close()
     game_stats_add(games_incomplete, region)
 
 
@@ -123,7 +123,7 @@ def parse_stats_worker(games_master, region):
 def parse_stats(region):
     conn = db.Connection()
     games = conn.games_elite_get(region)
-    del conn
+    conn.close()
     parse_stats_worker(games, region)
     core.sys.exit()  # TODO delete this and above line
     games_split = core.splitter(6, games)

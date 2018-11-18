@@ -27,15 +27,15 @@ def updatePlayerRank(players, target_player, target_found, queue, tier, region_b
         conn = db.Connection(0)
         action = conn.player_save(player_id, name,
                                       tier, div, region_base)
-        del conn
+        conn.close()
         if action == 0:
             added += 1
         elif action == 1:
             updated += 1
-    return target_found
     if verbose:
         print("Updated: " + str(updated))
         print("Added: " + str(added))
+    return target_found
 
 
 def getRanksFromLeague(region, player):

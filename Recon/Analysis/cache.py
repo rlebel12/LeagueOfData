@@ -121,7 +121,7 @@ def createCharacterCharts(arr, group):
                 if results == 0:
                     query = '''INSERT INTO ChampCache(champ, patchMajor, patchMinor, totalWRStats, region) VALUES (%s, %s, %s, %s, %s)'''
                     conn.execute(query, (champID, core.PATCH_MAJOR, core.PATCH_MINOR, 0, region))
-            del conn
+            conn.close()
 
 
 def main():

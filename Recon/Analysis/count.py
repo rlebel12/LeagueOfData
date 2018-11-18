@@ -18,4 +18,4 @@ def count():
                            (core.PATCH_MAJOR, core.PATCH_MINOR))
     results = str(results[0]['count'])
     print("Number of matches stored (current patch): " + results)
-    del conn
+    conn.close()

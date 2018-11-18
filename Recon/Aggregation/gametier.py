@@ -9,6 +9,8 @@ LAST_UPDATED_THRESHOLD = 7  # Days before player needs to update
 # Checks tier for ranked game by examining 'average' player rank.
 # Returns True if tier is at least Platinum
 def gametier_calc(game_data, region):
+    old_debug_all = db.Connection.debug_all
+    db.Connection.debug_all = False
     player_keys = {}
     sum = 0
     total = 10
@@ -18,7 +20,7 @@ def gametier_calc(game_data, region):
         conn = db.Connection()
         player_id = each['player']['summonerId']
         player = conn.player_get(player_id, region)
-        del conn
+        conn.close()
         try:
             last_updated = datetime.datetime.now() - player[0]['lastUpdated']
             last_updated = last_updated.days
@@ -32,7 +34,7 @@ def gametier_calc(game_data, region):
             else:
                 conn = db.Connection()
                 player = conn.player_get(player_id, region)
-                del conn
+                conn.close()
                 if len(player) == 0:
                     total -= 1
                     continue
@@ -57,4 +59,5 @@ def gametier_calc(game_data, region):
             tier_score = 6
         else:
             tier_score = math.floor(mean)
+    db.Connection.debug_all = old_debug_all
     return tier_score, player_keys

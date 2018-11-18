@@ -8,10 +8,21 @@ import json
 import time
 import datetime
 import os
+import sys
 
 
 class Connection:
-    def __init__(self, commit=1):
+    debug_all = False
+
+    def __init__(self, commit=True, debug=False):
+        if debug or Connection.debug_all:
+            self.commit = False
+            Connection.debug_all = True
+            self.debug = True
+        else:
+            self.commit = commit
+            self.debug = debug
+
         tries = 0
         conn_info = json.loads(os.environ['RECON_DB_CONNECTION'])
         try:
@@ -21,24 +32,43 @@ class Connection:
                 user=conn_info['user'], port=conn_info['port'],
                 password=conn_info['password'], db=conn_info['db'],
                 cursorclass=pymysql.cursors.DictCursor,
-                autocommit=commit, charset='utf8')
+                autocommit=self.commit, charset='utf8')
         except:
             print("DB connection failed.\nStack: ")
-            time.sleep(1)
+            time.sleep(0.2)
             self.__init__()
         # print("Connection established (" + str(tries) + " attempts)")
         self.crs = self.db.cursor()
-        self.commit = commit
         self.is_closed = False
 
     def __del__(self):
         if not self.is_closed:
-            if self.commit == 0:
+            self.close()
+    
+    def close(self):
+        if not self.is_closed:
+            if not self.commit and not self.debug:
                 self.db.commit()
             self.crs.close()
             self.db.close()
             self.is_closed = True
 
+    '''
+    ===============================================
+                Connection.execute()
+
+    Wrapper method for executing queries.  Method invoked in following form:
+
+    results = connection.execute(query,(args,))
+
+    Where results is the result set in JSON form, query is the query in
+    string form, and *args is an array of individual arguments for the query.
+
+    Query statement arguments should be formatted following this example format:
+
+    SELECT * FROM GameData WHERE gameKey = %s
+    ===============================================
+    '''
     def execute(self, *args):
         query = args[0]
         extra_args = False
@@ -61,7 +91,7 @@ class Connection:
                 self.crs.execute(error_insert_query,
                                  (str(error), str(query), str(variables)))
             else:
-                self.crs.execute(errInsert, (str(error), str(query), None))
+                self.crs.execute(error_insert_query, (str(error), str(query), None))
             error_key_query = "SELECT LAST_INSERT_ID();"
             error_key = self.execute(error_key_query, ())[0]['LAST_INSERT_ID()']
             print("SQL Error Encountered.  errorKey: " + str(error_key))
@@ -141,6 +171,7 @@ class Connection:
         VALUES (%s,%s,%s,%s,%s);
         '''
         key_query = "SELECT LAST_INSERT_ID();"
+
         self.execute(query, (id, rank, patch_major, patch_minor, region))
         key = self.execute(key_query, ())[0]['LAST_INSERT_ID()']
         query = "INSERT INTO GameData(gameKey, data) VALUES (%s, %s)"
@@ -160,13 +191,16 @@ class Connection:
             results = results[0]
             return results['patchMajor'], results['patchMinor']
 
+    # Finds basic information for match, and finds whether game data
+    # is currently stored in database
     def game_info_get(self, id, region):
         query = '''
         SELECT gameKey, rank FROM Game
         WHERE gameID = %s AND region = %s
         LIMIT 1;
         '''
-        return self.execute(query, (id, region))
+        game_info = self.execute(query, (id, region))
+        return game_info
 
     # Checks to see if there are 10 rows in the stats table corresponding
     # to the given match.  If False, then not all stats have been added yet.

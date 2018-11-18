@@ -19,7 +19,7 @@ import sys
 def game_data_get(key, region):
     conn = db.Connection()
     game_info = conn.game_info_get(key, region)
-    del conn
+    conn.close()
     if len(game_info) == 0:
         print("Match data for " + str(key) + " does not exist.  "
               "Adding to database...")
@@ -32,27 +32,28 @@ def game_data_get(key, region):
             version = response['gameVersion'].split('.')
             patch_major = int(version[0])
             patch_minor = int(version[1])
-            if (patch_major != core.PATCH_MAJOR or
-                    patch_minor != core.PATCH_MINOR):
+            if (patch_major < core.PATCH_MAJOR or
+                    patch_minor < core.PATCH_MINOR):
                     print("Game is not on current patch...")
                     conn = db.Connection()
                     conn.game_save(key, tier,
-                                   patch_major, patch_minor, region, None)
-                    del conn
+                                patch_major, patch_minor, region, game_data)
+                    conn.close()
                     return -2, -2, -2, -2
             conn = db.Connection()
             key = conn.game_save(key, tier, patch_major, patch_minor, region, game_data)
-            del conn
+            conn.close()
             return response, tier, key, players
         except AttributeError as e:
             print("AttributeError")
             print(e)
             return -1, -1, -1, -1
     else:
+        # This section reached if data stored in 'Game' table
         # TODO update this section to pull in playerKeys
         print("Match data for " + str(key) + " already exists.  Loading...")
-        tier = game_info['rank']
-        key = game_info['gameKey']
+        tier = game_info[0]['rank']
+        key = game_info[0]['gameKey']
         conn = db.Connection()
         if not conn.champ_stats_full(key):
             game_data = conn.game_data_get(key)
@@ -60,7 +61,7 @@ def game_data_get(key, region):
         else:
             print("Fully added data, no need for pull matchData.")
             game_data = tier = key = -1
-        del conn
+        conn.close()
         return game_data, tier, key
 
 
@@ -73,7 +74,7 @@ def games_collect(player, region, new_games,
     if time_end is None:
         time_epoch = datetime.datetime.utcfromtimestamp(0)
         time_now = datetime.datetime.now()
-        time_now = time_now.replace(hour=0, minute=0, second=0, microsecond=0)
+        #time_now = time_now.replace(hour=0, minute=0, second=0, microsecond=0)
         time_end = int((time_now - time_epoch).total_seconds() * 1000)
         time_begin = time_end - 604800000
     account_id = player['accountID']
@@ -111,7 +112,7 @@ def games_collect(player, region, new_games,
                     '''print("Adding game " + str(game['gameId']) +
                           " to list of new game.")'''
                     new_games.append(game['gameId'])
-        del conn
+        conn.close()
         new_games = games_collect(player, region, new_games,
                                     time_begin - 604800000,
                                     time_begin, streak)
@@ -144,7 +145,7 @@ def collect_region_worker(region, players, add_stats=True):
 def collect_region(region):
     conn = db.Connection()
     players = conn.players_elite_get(region)
-    del conn
+    conn.close()
     processes = []
     players_split = core.splitter(6, players)
     for player_group in players_split:
