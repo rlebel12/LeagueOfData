@@ -17,6 +17,7 @@ import sys
 
 # Retrieves stats for every player from given match, and returns stats
 def game_data_get(key, region):
+    print("test")
     conn = db.Connection()
     game_info = conn.game_info_get(key, region)
     conn.close()
