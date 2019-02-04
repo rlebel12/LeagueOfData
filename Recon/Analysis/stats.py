@@ -66,9 +66,9 @@ def game_stats_add(games, region):
                     participant_data = game_data['participants'][i]
                     champ_id = participant_data['championId']
                     win = changeWin[participant_data['stats']['win']]
-                    participant_id = participant_data['participant_id']
+                    participant_id = participant_data['participantId']
                     for participant in game_data['participantIdentities']:
-                        if participant['participant_id'] == participant_id:
+                        if participant['participantId'] == participant_id:
                             player_id = participant['player']['summonerId']
                             break
                     player_key = players[player_id]
@@ -111,9 +111,9 @@ def parse_stats_worker(games_master, region):
     conn = db.Connection()
     games_incomplete = []
     for game in games_master:
-        full = conn.champ_stats_full(each['gameKey'])
+        full = conn.champ_stats_full(game['gameKey'])
         if not full:
-            games_incomplete.append(each['gameID'])
+            games_incomplete.append(game['gameID'])
     conn.close()
     game_stats_add(games_incomplete, region)
 

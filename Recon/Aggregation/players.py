@@ -41,7 +41,7 @@ def updatePlayerRank(players, target_player, target_found, queue, tier, region_b
 def getRanksFromLeague(region, player):
     queue = Queue.Queue()
     target_found = False
-    url = "https://" + region.lower() + ".api.riotgames.com/lol/league/v3/positions/by-summoner/" + str(player)
+    url = "https://" + region.lower() + ".api.riotgames.com/lol/league/v4/positions/by-summoner/" + str(player)
     player_leagues = core.api_get(url)
     if player_leagues is None:
         return target_found
@@ -55,7 +55,7 @@ def getRanksFromLeague(region, player):
         print("Pulling data from league.  This might take a little while...")
         tier = db.tier_from_api[each['tier']]
         league_id = each['leagueId']
-        url = "https://" + region.lower() + ".api.riotgames.com/lol/league/v3/leagues/" + str(league_id)
+        url = "https://" + region.lower() + ".api.riotgames.com/lol/league/v4/leagues/" + str(league_id)
         league_data = core.api_get(url).json()
         # Prepare for threading
         threads = []

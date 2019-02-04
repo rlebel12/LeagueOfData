@@ -5,7 +5,6 @@ import math
 
 LAST_UPDATED_THRESHOLD = 7  # Days before player needs to update
 
-
 # Checks tier for ranked game by examining 'average' player rank.
 # Returns True if tier is at least Platinum
 def gametier_calc(game_data, region):
