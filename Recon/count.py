@@ -1,5 +1,5 @@
-from Recon.Utility import core
-from Recon.Utility import database as db
+from Recon import core
+from Recon import database as db
 
 # Used for the counting option listed below
 def count():

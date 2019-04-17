@@ -2,18 +2,19 @@
 Creates two dictionaries located in the bin/ directory mapping championIDs to champion names
 """
 
-from Recon.Utility import database as db
-from Recon.Utility import core
+from Recon import database as db
+from Recon import core
+
 import pathlib
 import os
 
 
 
 def update():
-    url = ("https://na1.api.riotgames.com/lol/static-data/v3/" +
+    url = ("https://na1.api.riotgames.com/lol/static-data/v4/" +
            "champions?locale=en_US&dataById=false")
     response = core.api_get(url).json()
-    path = str(pathlib.Path(core.os.getcwd())) + "\Data"
+    path = str(pathlib.Path(core.os.getcwd())) + "\\Data"
     nameToId = {}
     idToName = {}
     conn = db.Connection()

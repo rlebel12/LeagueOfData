@@ -2,40 +2,20 @@
 Contains basic functions for performing database transactions
 """
 
-from Recon.Utility import core
+from Recon import core
+
 import pymysql
 import json
 import time
 import datetime
 import os
 import sys
-import inspect
 
 
 class Connection:
     debug_all = False
-    open_connections = []
 
-    def __init__(self, commit=True, debug=False, auto_connect = True):
-        self.is_closed = True
-        self.frame_info = inspect.currentframe()
-        if auto_connect:
-            self.connect(commit, debug)
-
-    def __del__(self):
-        if not self.is_closed:
-            self.close()
-
-    @classmethod
-    def count_open_connections(cls):
-        count = 0
-        for each in cls.open_connections:
-            if each.is_closed is False:
-                print("Connected: " + str(each) + " - " + str(cls.open_connections.index(each)))
-                count = count+1
-        print("Active connections: " + str(count))
-
-    def connect(self, commit, debug):
+    def __init__(self, commit=True, debug=False):
         if debug or Connection.debug_all:
             self.commit = False
             Connection.debug_all = True
@@ -54,14 +34,17 @@ class Connection:
                 password=conn_info['password'], db=conn_info['db'],
                 cursorclass=pymysql.cursors.DictCursor,
                 autocommit=self.commit, charset='utf8')
-        except Exception as err:
-            print("DB connection failed.\n: " + str(err))
+        except:
+            print("DB connection failed.\nStack: ")
             time.sleep(0.2)
-            self.connect(commit, debug)
+            self.__init__()
         # print("Connection established (" + str(tries) + " attempts)")
         self.crs = self.db.cursor()
         self.is_closed = False
-        Connection.open_connections.append(self)
+
+    def __del__(self):
+        if not self.is_closed:
+            self.close()
     
     def close(self):
         if not self.is_closed:
@@ -70,7 +53,6 @@ class Connection:
             self.crs.close()
             self.db.close()
             self.is_closed = True
-        Connection.open_connections.remove(self)
 
     '''
     ===============================================
@@ -85,7 +67,7 @@ class Connection:
 
     Query statement arguments should be formatted following this example format:
 
-    SELECT * FROM GameData WHERE gameKey = %s
+    "SELECT * FROM GameData WHERE gameKey = %s"
     ===============================================
     '''
     def execute(self, *args):
@@ -123,11 +105,10 @@ class Connection:
         results = self.execute(query, (region, id))
         if len(results) == 0:
             url = ("https://" + region +
-                   ".api.riotgames.com/lol/summoner/v4/summoners/" +
+                   ".api.riotgames.com/lol/summoner/v3/summoners/" +
                    str(id))
             playerInfo = core.api_get(url).json()
             accountID = playerInfo['accountId']
-            print("Attempting to add account ID " + str(accountID))
             query = '''
             INSERT INTO Player(summonerID, accountID, summonerName,
             tier, division, region)
@@ -185,7 +166,6 @@ class Connection:
         results = self.execute(query, (key))
         return json.loads(results[0]['data'])
 
-    # TODO: Change this to account for updating GameData rows
     def game_save(self, id, rank, patch_major, patch_minor, region, data, key):
         query = '''
         INSERT INTO Game(gameID, rank, patchMajor, patchMinor, region)
@@ -193,9 +173,8 @@ class Connection:
         '''
         key_query = "SELECT LAST_INSERT_ID();"
 
-        if key is None:
-            self.execute(query, (id, rank, patch_major, patch_minor, region))
-            key = self.execute(key_query, ())[0]['LAST_INSERT_ID()']
+        self.execute(query, (id, rank, patch_major, patch_minor, region))
+        key = self.execute(key_query, ())[0]['LAST_INSERT_ID()']
         query = "INSERT INTO GameData(gameKey, data) VALUES (%s, %s)"
         self.execute(query, (key, data))
         return key
@@ -217,9 +196,8 @@ class Connection:
     # is currently stored in database
     def game_info_get(self, id, region):
         query = '''
-        SELECT g.gameKey, g.rank, gd.gameKey FROM Game g
-        LEFT OUTER JOIN GameData gd ON g.gameKey = gd.gameKey
-        WHERE g.gameID = %s AND g.region = %s
+        SELECT gameKey, rank FROM Game
+        WHERE gameID = %s AND region = %s
         LIMIT 1;
         '''
         game_info = self.execute(query, (id, region))

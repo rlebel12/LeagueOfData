@@ -1,6 +1,7 @@
-from Recon.Utility import core
-from Recon.Utility import database as db
-from Recon.Utility import queue as Queue
+from Recon import core
+from Recon import database as db
+from Recon import queue as Queue
+
 import threading
 
 

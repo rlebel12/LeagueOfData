@@ -3,17 +3,16 @@ This module is responsible for the data aggregation
 component of the application.
 """
 
-from Recon.Aggregation import collect
-from Recon.Utility import core
-from Recon.Utility import database as db
+from Recon import collect
+from Recon import core
+from Recon import database as db
+
 import random
 import multiprocessing
 import threading
 import json
 import datetime
 
-# TODO: Skip checking existing matches when collecting, rely on integrity
-#       errors
 
 changeTeam = {100: 0, 200: 1}
 changeWin = {"Win": 1, "Fail": 0, "True": 1, "False": 0,
@@ -124,8 +123,6 @@ def parse_stats(region):
     conn = db.Connection()
     games = conn.games_elite_get(region)
     conn.close()
-    parse_stats_worker(games, region)
-    core.sys.exit()  # TODO delete this and above line
     games_split = core.splitter(6, games)
     threads = []
     for game_group in games_split:

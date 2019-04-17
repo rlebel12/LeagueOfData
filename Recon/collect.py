@@ -3,10 +3,11 @@ This module is responsible for the data aggregation
 component of the application.
 """
 
-from Recon.Analysis import stats
-from Recon.Aggregation import gametier
-from Recon.Utility import core
-from Recon.Utility import database as db
+from Recon import stats
+from Recon import gametier
+from Recon import core
+from Recon import database as db
+
 import random
 import multiprocessing
 import threading

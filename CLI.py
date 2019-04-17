@@ -3,10 +3,10 @@ Basic interface for performing application functions
 """
 
 #import updateDatabase as updb
-from Recon.Aggregation import collect
-from Recon.Analysis import cache
-from Recon.Analysis.count import count
-from Recon.Utility import champDict as cd
+from Recon import collect
+from Recon import cache
+from Recon import count
+from Recon import champDict as cd
 import sys
 import os
 
@@ -45,7 +45,8 @@ if __name__ == '__main__':
             try:
                 print()
                 for region in ['NA', 'KR']:
-                    updb.updateTopSumms(region)
+                    continue
+                    #updb.updateTopSumms(region)
             except:
                 pass
         elif choice == 3:
@@ -56,7 +57,8 @@ if __name__ == '__main__':
                 while region not in ['NA', 'KR']:
                     region = input("Invalid region.  Please",
                                    "try again [NA, KR]: ").upper()
-                updb.updateSumms(region)
+                continue
+                #updb.updateSumms(region)
             except KeyboardInterrupt:
                 pass
         elif choice == 4:
@@ -65,13 +67,14 @@ if __name__ == '__main__':
                 while region.upper() not in ['NA1', 'KR']:
                     region = input("Invalid region.  Please",
                                    "try again [NA1, KR]: ").upper()
-                addWinStats.parse_stats(region.upper())
+                continue
+                #addWinStats.parse_stats(region.upper())
             except KeyboardInterrupt:
                 pass
         elif choice == 5:
-            count()
+            count.count()
         elif choice == 6:
-            charCache.main()
+            cache.main()
         elif choice == 7:
             cd.update()
         elif choice == numOptions:

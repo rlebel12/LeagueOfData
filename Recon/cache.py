@@ -2,8 +2,10 @@
 Fills out ChampCache table with data summaries for use when clients make requests for champion data
 """
 
-from Recon.Utility import core
-from Recon.Utility import database as db
+from Recon import core
+from Recon import database as db
+
+import threading
 
 
 # Continues buidling stat summary (existing dictionary of lists) with new stats (dictionary)
@@ -132,7 +134,7 @@ def main():
     arrs = core.splitter(10, arrs)
     threads = []
     for each in arrs:
-        t = core.threading.Thread(target=createCharacterCharts, args=(each, group))
+        t = threading.Thread(target=createCharacterCharts, args=(each, group))
         t.daemon = True
         threads.append(t)
         t.start()
