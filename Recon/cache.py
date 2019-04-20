@@ -76,7 +76,6 @@ def partitionDuration(time, win): #a:0-25, b: 25-30, c: 35-40, d: 40-45, e: 45+
     return (allGames,allWins)
 
 
-# TODO
 def createCharacterCharts(arr, group):
     #champDict = getIDChampDict()
     wantedStatKeys = ['kills','deaths','assists','totalDamageDealtToChampions','largestMultiKill','largestKillingSpree','turretKills','totalTimeCrowdControlDealt','goldEarned','totalMinionsKilled','neutralMinionsKilledTeamJungle','neutralMinionsKilledEnemyJungle','totalHeal','totalDamageTaken']

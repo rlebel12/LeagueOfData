@@ -50,7 +50,6 @@ def game_data_get(gameID, region):
             print(e)
             return -1, -1, -1, -1
     else:
-        # TODO update this section to pull in playerKeys
         tier = game_info[0]['rank']
         key = game_info[0]['gameKey']
         print("Match data for " + str(key) + " already exists.  Loading...")
@@ -165,3 +164,6 @@ def collect_region(region, is_multiprocessing = True):
                 process.terminate()
     else:
         collect_region_worker(region, players)
+
+if __name__ == '__main__':
+    collect_region('NA1')
