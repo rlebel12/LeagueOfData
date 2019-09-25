@@ -1,7 +1,0 @@
-__pycache__/
-venv_recon/*
-test.py
-*.vscode
-Recon/updateDatabase.py
-Data/*.json
-CLI.py
